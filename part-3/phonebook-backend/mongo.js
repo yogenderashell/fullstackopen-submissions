@@ -1,26 +1,26 @@
-const mongoose = require('mongoose')
-require('dotenv').config()
+const mongoose = require("mongoose");
+const config = require("./utils/config");
 
-const url = process.env.MONGODB_URL
-console.log(url)
+const url = process.env.MONGODB_URL;
+console.log(url);
 
-mongoose.set('strictQuery', false)
+mongoose.set("strictQuery", false);
 mongoose
   .connect(url)
   .then((res) => {
-    console.log('connection success')
+    console.log("connection success");
   })
   .catch((err) => {
-    console.error(err)
-  })
+    console.error(err);
+  });
 
 const personSchema = mongoose.Schema({
   number: {
     type: String,
-    required: [true, 'User phone number required'],
+    required: [true, "User phone number required"],
     validate: {
       validator: function (v) {
-        return /\d{3}-\d{7}/.test(v)
+        return /\d{3}-\d{7}/.test(v);
       },
       message: (props) => `${props.value} is not a valid phone number`,
     },
@@ -30,7 +30,7 @@ const personSchema = mongoose.Schema({
     required: true,
     minLength: 8,
   },
-})
+});
 
 // personSchema.set("toJSON", {
 //   transform: (document, returnedObject) => {
@@ -39,5 +39,5 @@ const personSchema = mongoose.Schema({
 //     delete returnedObject.__v;
 //   },
 // });
-const Person = mongoose.model('Person', personSchema)
-module.exports = Person
+const Person = mongoose.model("Person", personSchema);
+module.exports = Person;

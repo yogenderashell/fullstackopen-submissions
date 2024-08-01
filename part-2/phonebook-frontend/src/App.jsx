@@ -15,13 +15,14 @@ const Notification = ({ message }) => {
 
 const App = () => {
   const [persons, setPersons] = useState([]);
+  const [filteredPersons, setFilteredPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filterText, setFilterText] = useState("");
   const [message, setMessage] = useState(null);
   console.log(persons);
 
-  const addNote = (e) => {
+  const addPerson = (e) => {
     e.preventDefault();
     const isExist = persons.find((person) => person.name === newName);
     const phoneObject = {
@@ -33,50 +34,67 @@ const App = () => {
         `${newName} is already added to phonebook, replace the old number with a new one?`
       );
       if (confirm) {
-        const id = isExist.id;
+        const id = isExist._id;
         phoneBookServices.update(id, phoneObject).then((res) => {
           setMessage(`Updated ${newName}`);
-          setPersons(
-            persons.map((person) => (person.id !== id ? person : res.data))
+          setFilteredPersons(
+            persons.map((person) => (person._id !== id ? person : res.data))
           );
         });
       }
       return;
     }
-    phoneBookServices.create(phoneObject).then((response) => {
-      console.log(response);
-      setMessage(`Added ${newName}`);
-      setNewName("");
-      setNewNumber("");
-      setPersons(persons.concat(response.data));
-    });
+    phoneBookServices
+      .create(phoneObject)
+      .then((response) => {
+        console.log(response);
+        setMessage(`Added ${newName}`);
+        setNewName("");
+        setNewNumber("");
+        setPersons(persons.concat(response.data));
+      })
+      .catch((err) => {
+        setMessage(`validation Error: ${err.response.data.error}`);
+        console.log(err);
+      });
   };
 
   const handleFilter = (e) => {
     setFilterText(e.target.value);
-    const filtered = persons.filter((person) =>
-      person.name.toLowerCase().includes(e.target.value.toLowerCase())
-    );
-    setPersons(filtered);
+    if (e.target.value === "") {
+      setFilteredPersons(persons);
+    } else {
+      const filteredPersons = persons.filter((person) =>
+        person.name.toLowerCase().includes(filterText.toLowerCase())
+      );
+      setFilteredPersons(filteredPersons);
+    }
   };
 
   useEffect(() => {
-    phoneBookServices.getAll().then((res) => setPersons(res.data));
+    phoneBookServices.getAll().then((res) => {
+      setPersons(res.data);
+    });
   }, []);
+
+  useEffect(() => {
+    setFilteredPersons(persons);
+  }, [persons]);
 
   const handleDelete = (id) => {
     phoneBookServices
       .deletePhone(id)
       .then((res) => {
-        setPersons(persons.filter((person) => person.id !== id));
+        setMessage("item deleted Successfully")
+        setPersons(persons.filter((person) => person._id !== id));
       })
       .catch((err) => {
         setMessage(
           `Information of ${
-            persons.find((person) => person.id === id).name
+            persons.find((person) => person._id === id).name
           } has already been removed from server`
         );
-        setPersons(persons.filter((person) => person.id !== id));
+        setPersons(persons.filter((person) => person._id !== id));
       });
   };
 
@@ -85,16 +103,16 @@ const App = () => {
       <h2>Phonebook</h2>
       <Notification message={message} />
       <Filter filterText={filterText} handleFilter={handleFilter} />
-      <h3>Add new person</h3>
+      <h3>Add new person - use the format 000-0000000</h3>
       <PersonForm
-        handleSubmit={addNote}
+        handleSubmit={addPerson}
         newName={newName}
         setNewName={setNewName}
         newNumber={newNumber}
         setNewNumber={setNewNumber}
       />
       <h2>Numbers</h2>
-      <Persons handleDelete={handleDelete} persons={persons} />
+      <Persons handleDelete={handleDelete} persons={filteredPersons} />
     </div>
   );
 };

@@ -2,13 +2,9 @@ const Persons = (props) => {
   return (
     <ul>
       {props.persons.map((person) => (
-        <li key={person.name}>
+        <li key={person._id}>
           {person.name} {person.number}{" "}
-          {
-            <button onClick={() => props.handleDelete(person.id)}>
-              Delete
-            </button>
-          }
+          <button onClick={() => props.handleDelete(person._id)}>Delete</button>
         </li>
       ))}
     </ul>

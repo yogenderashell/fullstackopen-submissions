@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseUrl = "http://localhost:3001/persons";
+const baseUrl = "http://localhost:3001/api/persons";
 
 const getAll = () => {
   return axios.get(baseUrl);
@@ -16,7 +16,7 @@ const update = (id, newObject) => {
 
 const deletePhone = (id) => {
   const res = confirm("Do you seriously wanna delete this? 😱");
-  console.log(res)
+  console.log(res);
   if (!res) return;
   return axios.delete(`${baseUrl}/${id}`);
 };
